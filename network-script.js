@@ -1,4 +1,7 @@
 
+// taken from https://bl.ocks.org/heybignick/3faf257bbbbc7743bb72310d03b86ee8
+// thanks to Simon Johnson for help
+
 var svg = d3.select("svg"),
     width = +svg.attr("width"),
     height = +svg.attr("height");
@@ -63,7 +66,15 @@ d3.json("files/network.json", function(error, graph) {
                 return "translate(" + d.x + "," + d.y + ")";
             })
     }
+
+    // added by dpm
+    svg.call(d3.zoom().on("zoom", zoom))
 });
+
+// added by dpm
+function zoom() {
+    svg.attr("transform", d3.event.transform);
+}
 
 function dragstarted(d) {
     if (!d3.event.active) simulation.alphaTarget(0.3).restart();
