@@ -1,3 +1,5 @@
+// code originally taken from https://bl.ocks.org/puzzler10/4438752bb93f45dc5ad5214efaa12e4a
+
 function run_simulation (nodes_data, links_data) {
 
     //create somewhere to put the force directed graph
