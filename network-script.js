@@ -5,19 +5,19 @@ function run_simulation (nodes_data, links_data) {
         width = +svg.attr("width"),
         height = +svg.attr("height");
 
-    var radius = 15; 
+    var radius = 10; 
 
     //set up the simulation and add forces  
     var simulation = d3.forceSimulation()
         .nodes(nodes_data);
 
     var link_force =  d3.forceLink(links_data)
-        .id(function(d) { return d.id; });            
+        .id(function(d) { return d.stub; });            
 
     var charge_force = d3.forceManyBody()
         .strength(-100); 
 
-    var center_force = d3.forceCenter(width / 2, height / 2);  
+    var center_force = d3.forceCenter(width / 2, height / 2);
 
     simulation
         .force("charge_force", charge_force)
@@ -52,6 +52,9 @@ function run_simulation (nodes_data, links_data) {
         .attr("r", radius)
         .attr("fill", circleColour);
 
+    // Show full name on mouseover
+    node.append("title")
+        .text(function(d) { return d.name; });
 
     //add drag capabilities  
     var drag_handler = d3.drag()
