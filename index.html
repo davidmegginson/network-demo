@@ -6,6 +6,28 @@
     <link rel="stylesheet" href="network-style.css"/>
   </head>
   <body>
+    <form id="filter">
+      <fieldset>
+        <label>
+          <input type="radio" name="source" value="3W"/>
+          <span>3W</span>
+        </label>
+        <label>
+          <input type="radio" name="source" value="IATI"/>
+          <span>IATI</span>
+        </label>
+        <label>
+          <input type="radio" name="source" value="Both" checked="checked"/>
+          <span>Both</span>
+        </label>
+      </fieldset>
+      <fieldset>
+        <label>
+          <input type="checkbox" name="humanitarian_only"/>
+          Humanitarian only
+        </label>
+      </fieldset>
+    </form>
     <svg xmlns="http://www.w3.org/2000/svg" id="network-diagram" width="1024" height="768"></svg>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="network-script.js"></script>

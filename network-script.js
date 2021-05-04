@@ -7,6 +7,8 @@ function runSimulation (data) {
         width = +svg.attr("width"),
         height = +svg.attr("height");
 
+    svg.selectAll("*").remove();
+
     var radius = 10; 
 
     //set up the simulation and add forces  
@@ -26,7 +28,6 @@ function runSimulation (data) {
         .force("center_force", center_force)
         .force("links",link_force)
     ;
-
 
     //add tick instructions: 
     simulation.on("tick", tickActions );
@@ -136,9 +137,12 @@ function runSimulation (data) {
             .attr("x2", function(d) { return d.target.x; })
             .attr("y2", function(d) { return d.target.y; });
     }
+
+    return svg;
 }
 
-function transformData (orgs) {
+
+function transformData (orgs, source, humanitarian_only) {
     let links = [], orgsUsed = {};
     Object.values(orgs).forEach(org => {
         if (org.info.skip) {
@@ -150,6 +154,18 @@ function transformData (orgs) {
                 if (partner.info.stub <= org.info.stub || partner.info.skip) {
                     return;
                 }
+
+                // if the source param isn't null, then both orgs must include that source
+                // FIXME (that doesn't mean that the relationship is in the source, though)
+                if (source !== "Both" && !(org.sources.includes(source) && partner.sources.includes(source))) {
+                    return;
+                }
+
+                // if the humanitarian_only param is true, then both orgs must be humanitarian
+                if (humanitarian_only && !(org.humanitarian && partner.humanitarian)) {
+                    return;
+                }
+
                 links.push({
                     source: org.info.stub,
                     target: partner.info.stub,
@@ -160,20 +176,33 @@ function transformData (orgs) {
             });
         }
     });
+
+    // Return data in a format usable by d3.forceSimulation() 
     return {
         nodes: Object.values(orgsUsed),
         links: links
     };
 }
 
+function drawViz (orgIndex, source, humanitarian_only) {
+    let data = transformData(orgIndex, source, humanitarian_only);
+    let svg = runSimulation(data);
+}
+
 
 // Load JSON then render
-let promise = fetch("https://davidmegginson.github.io/iati3w-data/org-index.json");
+
+const promise = fetch("https://davidmegginson.github.io/iati3w-data/org-index.json");
 
 promise.then(result => {
+    let formNode = document.getElementById("filter");
     result.json().then(orgIndex => {
-        let data = transformData(orgIndex);
-        runSimulation(data);
+        formNode.addEventListener("change", event => {
+            let source = formNode.elements.source.value;
+            let humanitarian_only = formNode.elements.humanitarian_only.checked;
+            drawViz(orgIndex, source, humanitarian_only);
+        });
+        drawViz(orgIndex, "Both", false);
     });
 });
 
