@@ -1,6 +1,6 @@
 // code originally taken from https://bl.ocks.org/puzzler10/4438752bb93f45dc5ad5214efaa12e4a
 
-function run_simulation (nodes_data, links_data) {
+function runSimulation (data) {
 
     //create somewhere to put the force directed graph
     var svg = d3.select("svg"),
@@ -11,10 +11,10 @@ function run_simulation (nodes_data, links_data) {
 
     //set up the simulation and add forces  
     var simulation = d3.forceSimulation()
-        .nodes(nodes_data);
+        .nodes(data.nodes);
 
-    var link_force =  d3.forceLink(links_data)
-        .id(d => d.stub);            
+    var link_force =  d3.forceLink(data.links)
+        .id(d => d.info.stub);            
 
     var charge_force = d3.forceManyBody()
         .strength(-100); 
@@ -39,16 +39,16 @@ function run_simulation (nodes_data, links_data) {
     var link = g.append("g")
         .attr("class", "links")
         .selectAll("line")
-        .data(links_data)
+        .data(data.links)
         .enter().append("line")
-        .attr("stroke-width", d => d.value)
+        .attr("stroke-width", d => Math.sqrt(Math.sqrt(d.value)))
         .style("stroke", linkColour);        
 
     //draw circles for the nodes 
     var node = g.append("g")
         .attr("class", "nodes") 
         .selectAll("circle")
-        .data(nodes_data)
+        .data(data.nodes)
         .enter()
         .append("circle")
         .attr("r", radius)
@@ -56,7 +56,7 @@ function run_simulation (nodes_data, links_data) {
 
     // Show full name on mouseover
     node.append("title")
-        .text(d => d.name);
+        .text(d => d.info.name);
 
     //add drag capabilities  
     var drag_handler = d3.drag()
@@ -84,7 +84,7 @@ function run_simulation (nodes_data, links_data) {
             international: "blue",
             unknown: "grey"
         }
-        return colors[d.scope];
+        return colors[d.info.scope];
     }
 
     //Function to choose the line colour and thickness 
@@ -138,13 +138,42 @@ function run_simulation (nodes_data, links_data) {
     }
 }
 
+function transformData (orgs) {
+    let links = [], orgsUsed = {};
+    Object.values(orgs).forEach(org => {
+        if (org.info.skip) {
+            return;
+        }
+        for (var scope in org.partners) {
+            Object.keys(org.partners[scope]).forEach(stub => {
+                let partner = orgs[stub];
+                if (partner.info.stub <= org.info.stub || partner.info.skip) {
+                    return;
+                }
+                links.push({
+                    source: org.info.stub,
+                    target: partner.info.stub,
+                    value: org.partners[scope][stub]
+                });
+                orgsUsed[org.info.stub] = org;
+                orgsUsed[partner.info.stub] = partner;
+            });
+        }
+    });
+    return {
+        nodes: Object.values(orgsUsed),
+        links: links
+    };
+}
+
 
 // Load JSON then render
-let promise = fetch("files/network.json");
+let promise = fetch("https://davidmegginson.github.io/iati3w-data/org-index.json");
 
 promise.then(result => {
-    result.json().then(data => {
-        run_simulation(data.nodes, data.links);
+    result.json().then(orgIndex => {
+        let data = transformData(orgIndex);
+        runSimulation(data);
     });
 });
 
