@@ -92,11 +92,7 @@ function runSimulation (data) {
     //If the link type is "A" return green 
     //If the link type is "E" return red 
     function linkColour(d){
-        if(d.type == "A"){
-            return "green";
-        } else {
-            return "red";
-        }
+        return "grey";
     }
 
     //Drag functions 
@@ -138,7 +134,7 @@ function runSimulation (data) {
             .attr("y2", function(d) { return d.target.y; });
     }
 
-    return svg;
+    return g;
 }
 
 
@@ -184,9 +180,28 @@ function transformData (orgs, source, humanitarian_only) {
     };
 }
 
+function fitViz () {
+    const svg = d3.select("svg");
+    const g = svg.select("g");
+    
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const bounds = g.node().getBBox();
+
+    const scale = .25;
+
+    g.transition().duration(500).attr(
+        "transform",
+        "translate(" + width/2 + "," + height/2 + ")"
+            + " scale(" + scale + ")"
+            + " translate(" + -(width/bounds.width) + "," + -(height/bounds.height) + ")"
+    );
+}
+
 function drawViz (orgIndex, source, humanitarian_only) {
     let data = transformData(orgIndex, source, humanitarian_only);
-    let svg = runSimulation(data);
+    runSimulation(data);
+    fitViz();
 }
 
 
