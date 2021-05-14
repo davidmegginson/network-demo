@@ -72,6 +72,10 @@ function runSimulation (data) {
 
     drag_handler(node);
 
+    node.on("click tap", node => {
+        console.log(node.info.stub);
+    });
+
 
     //add zoom capabilities 
     var zoom_handler = d3.zoom()
