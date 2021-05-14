@@ -7,21 +7,26 @@ function runSimulation (data) {
         width = +svg.attr("width"),
         height = +svg.attr("height");
 
+    // clear any existing graph
     svg.selectAll("*").remove();
 
+    // node radius in pixels
     var radius = 10; 
 
-    //set up the simulation and add forces  
-    var simulation = d3.forceSimulation()
+    //
+    // Set up the simulation and add forces
+    //
+    
+    let simulation = d3.forceSimulation()
         .nodes(data.nodes);
 
-    var link_force =  d3.forceLink(data.links)
+    let link_force =  d3.forceLink(data.links)
         .id(d => d.info.stub);            
 
-    var charge_force = d3.forceManyBody()
+    let charge_force = d3.forceManyBody()
         .strength(-100); 
 
-    var center_force = d3.forceCenter(width / 2, height / 2);
+    let center_force = d3.forceCenter(width / 2, height / 2);
 
     simulation
         .force("charge_force", charge_force)
@@ -134,18 +139,27 @@ function runSimulation (data) {
             .attr("y2", function(d) { return d.target.y; });
     }
 
-    return g;
+    console.log(g);
+
 }
 
 
+const KEYS = {
+    Both: "all",
+    "3W": "3w",
+    IATI: "iati"
+};
+
 function transformData (orgs, source, humanitarian_only) {
+    const key = KEYS[source];
     let links = [], orgsUsed = {};
+    
     Object.values(orgs).forEach(org => {
         if (org.info.skip) {
             return;
         }
-        for (var scope in org.partners) {
-            Object.keys(org.partners[scope]).forEach(stub => {
+        for (var scope in org.partners[key]) {
+            Object.keys(org.partners[key][scope]).forEach(stub => {
                 let partner = orgs[stub];
                 if (partner.info.stub <= org.info.stub || partner.info.skip) {
                     return;
@@ -165,7 +179,7 @@ function transformData (orgs, source, humanitarian_only) {
                 links.push({
                     source: org.info.stub,
                     target: partner.info.stub,
-                    value: org.partners[scope][stub]
+                    value: org.partners[key][scope][stub]
                 });
                 orgsUsed[org.info.stub] = org;
                 orgsUsed[partner.info.stub] = partner;
@@ -180,6 +194,9 @@ function transformData (orgs, source, humanitarian_only) {
     };
 }
 
+/**
+ * Attempt to fit the viz to the visible area
+ */
 function fitViz () {
     const svg = d3.select("svg");
     const g = svg.select("g");
@@ -198,6 +215,9 @@ function fitViz () {
     );
 }
 
+/**
+ * (Re)draw the visualisation
+ */
 function drawViz (orgIndex, source, humanitarian_only) {
     let data = transformData(orgIndex, source, humanitarian_only);
     runSimulation(data);
