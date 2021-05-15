@@ -37,3 +37,14 @@ form {
 fieldset {
     border: 0;
 }
+
+.popup {
+    font-family: Helvetica, sanserif;
+    font-size: .8rem;
+    border-radius: .5rem;
+    opacity: 0.9;
+    background: white;
+    padding: 1ex;
+    border: solid 1px;
+    width: 10em;
+}

@@ -31,7 +31,24 @@
       </fieldset>
     </form>
     <svg xmlns="http://www.w3.org/2000/svg" id="network-diagram" width="1024" height="768"></svg>
+    <script type="template" id="tip-template">
+      <div class="popup">
+        <p>
+          <a target="_blank" href="https://iati-3w.humportal.org/orgs/{{ org.info.stub }}">
+            {{ org.info.name }}
+          </a>
+          {% if org.info.name != org.info.shortname %}
+          ({{ org.info.shortname }})
+          {% endif %}
+        </p>
+        <p>
+          Scope: {{ org.info.scope }}
+        </p>
+      </div>
+    </script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="lib/d3-tip.js"></script>
+    <script src="lib/nunjucks.min.js"></script>
     <script src="network-script.js"></script>
   </body>
 </html>

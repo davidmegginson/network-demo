@@ -1,5 +1,17 @@
 // code originally taken from https://bl.ocks.org/puzzler10/4438752bb93f45dc5ad5214efaa12e4a
 
+// install compability features with Jinja2
+nunjucks.installJinjaCompat();
+
+// default Nunjucks template environment (for extensions)
+const templateEnv = new nunjucks.configure();
+
+// Render a Nunjucks template
+function renderTemplate(templateId, data) {
+    return nunjucks.renderString(document.getElementById(templateId).innerHTML, data);
+}
+
+// Run the force simulation
 function runSimulation (data) {
 
     //create somewhere to put the force directed graph
@@ -19,6 +31,7 @@ function runSimulation (data) {
     
     let simulation = d3.forceSimulation()
         .nodes(data.nodes);
+
 
     let link_force =  d3.forceLink(data.links)
         .id(d => d.info.stub);            
@@ -40,6 +53,12 @@ function runSimulation (data) {
     //add encompassing group for the zoom 
     var g = svg.append("g")
         .attr("class", "everything");
+
+    let tip = d3.tip().attr('class', 'd3-tip').html(org => {
+        return renderTemplate("tip-template", { org: org });
+    });
+    svg.call(tip);
+
 
     //draw lines for the links 
     var link = g.append("g")
@@ -73,7 +92,8 @@ function runSimulation (data) {
     drag_handler(node);
 
     node.on("click tap", node => {
-        console.log(node.info.stub);
+        console.log(node.info.stub, tip);
+        tip.show(node);
     });
 
 
