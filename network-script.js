@@ -11,6 +11,10 @@ function renderTemplate(templateId, data) {
     return nunjucks.renderString(document.getElementById(templateId).innerHTML, data);
 }
 
+let tip = d3.tip().attr('class', 'd3-tip').html(org => {
+    return renderTemplate("tip-template", { org: org });
+});
+
 // Run the force simulation
 function runSimulation (data) {
 
@@ -54,9 +58,6 @@ function runSimulation (data) {
     var g = svg.append("g")
         .attr("class", "everything");
 
-    let tip = d3.tip().attr('class', 'd3-tip').html(org => {
-        return renderTemplate("tip-template", { org: org });
-    });
     svg.call(tip);
 
 
@@ -91,11 +92,16 @@ function runSimulation (data) {
 
     drag_handler(node);
 
-    node.on("click tap", node => {
-        console.log(node.info.stub, tip);
-        tip.show(node);
+    svg.on("click tap", node => {
+        console.log("svg");
+        tip.hide();
     });
 
+    node.on("click tap", node => {
+        console.log("node");
+        tip.show(node);
+        d3.event.stopPropagation();
+    });
 
     //add zoom capabilities 
     var zoom_handler = d3.zoom()
@@ -127,6 +133,7 @@ function runSimulation (data) {
     //Drag functions 
     //d is the node 
     function drag_start(d) {
+        tip.hide();
         if (!d3.event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
         d.fy = d.y;
@@ -146,6 +153,7 @@ function runSimulation (data) {
 
     //Zoom functions 
     function zoom_actions(){
+        tip.hide();
         g.attr("transform", d3.event.transform)
     }
 
@@ -162,8 +170,6 @@ function runSimulation (data) {
             .attr("x2", function(d) { return d.target.x; })
             .attr("y2", function(d) { return d.target.y; });
     }
-
-    console.log(g);
 
 }
 
@@ -231,7 +237,7 @@ function fitViz () {
 
     const scale = .25;
 
-    g.transition().duration(500).attr(
+    g.transition().duration(0).attr(
         "transform",
         "translate(" + width/2 + "," + height/2 + ")"
             + " scale(" + scale + ")"
@@ -244,6 +250,7 @@ function fitViz () {
  */
 function drawViz (orgIndex, source, humanitarian_only) {
     let data = transformData(orgIndex, source, humanitarian_only);
+    tip.hide();
     runSimulation(data);
     fitViz();
 }
@@ -261,7 +268,7 @@ promise.then(result => {
             let humanitarian_only = formNode.elements.humanitarian_only.checked;
             drawViz(orgIndex, source, humanitarian_only);
         });
-        drawViz(orgIndex, "Both", false);
+        drawViz(orgIndex, "3W", false);
     });
 });
 
