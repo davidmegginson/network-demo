@@ -84,7 +84,7 @@ function runSimulation (data) {
 
     // Show full name on mouseover
     node.append("title")
-        .text(d => d.info.name);
+        .text(d => makeName(d));
 
     //add drag capabilities  
     var drag_handler = d3.drag()
@@ -253,6 +253,15 @@ function drawViz (orgIndex, source, humanitarian_only) {
     tip.hide();
     runSimulation(data);
     fitViz();
+}
+
+// Construct a pop-up label for an org
+function makeName (org) {
+    if (org.info.name === org.info.shortname) {
+        return org.info.name;
+    } else {
+        return org.info.name + " (" + org.info.shortname + ")";
+    }
 }
 
 
