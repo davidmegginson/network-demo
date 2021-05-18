@@ -11,6 +11,8 @@ function renderTemplate(templateId, data) {
     return nunjucks.renderString(document.getElementById(templateId).innerHTML, data);
 }
 
+let zoom = d3.zoom();
+
 let tip = d3.tip().attr('class', 'd3-tip').html(org => {
     return renderTemplate("tip-template", { org: org });
 });
@@ -104,10 +106,7 @@ function runSimulation (data) {
     });
 
     //add zoom capabilities 
-    var zoom_handler = d3.zoom()
-        .on("zoom", zoom_actions);
-
-    zoom_handler(svg);     
+    svg.call(zoom.on("zoom", zoom_actions));
 
     /** Functions **/
 
@@ -243,6 +242,7 @@ function fitViz () {
             + " scale(" + scale + ")"
             + " translate(" + -(width/bounds.width) + "," + -(height/bounds.height) + ")"
     );
+
 }
 
 /**
